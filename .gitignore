@@ -1,0 +1,24 @@
+# Build output
+build/
+dist/
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# VS Code settings
+.vscode/
+
+# IDEs
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Coverage
+coverage/
