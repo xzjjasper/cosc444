@@ -1,0 +1,5 @@
+data/
+cow_dataset/
+*.DS_Store
+*.log
+__pycache__/

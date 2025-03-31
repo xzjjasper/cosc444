@@ -1,0 +1,8 @@
+numpy>=1.19.0
+opencv-python>=4.5.0
+opencv-contrib-python>=4.5.0
+scikit-image>=0.17.2
+scikit-learn>=0.24.0
+matplotlib>=3.3.0
+tqdm>=4.50.0 
+matlab-engine-for-python>=1.0.0
