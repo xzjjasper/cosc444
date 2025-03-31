@@ -8,31 +8,25 @@ from imutils.object_detection import non_max_suppression
 from skimage.feature import hog
 from skimage.transform import pyramid_gaussian
 
-# Allow duplicate lib loading
+# Allow duplicate lib loading (if needed)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 # Parameters for detection
-size = (64, 128)            # Detection window size
-step_size = (9, 9)          # Sliding window step size
-downscale = 1.25            # Pyramid downscale factor
+size = (64, 128)  # Detection window size
+step_size = (9, 9)  # Sliding window step size
+downscale = 1.25  # Pyramid downscale factor
 
-# Folder with images and output CSV file name
+# Folder with images and output CSV file name (updated to reflect Random Forest)
 images_folder = "PNGImages"
-output_csv = "Annotations (HOG+SVM).csv"
+output_csv = "Annotations (HOG+RF).csv"
 
 # Load the trained model (if it's a tuple, extract the first element)
-loaded_data = joblib.load('model.dat')
+loaded_data = joblib.load('models/models_RF.dat')
 model = loaded_data[0] if isinstance(loaded_data, tuple) else loaded_data
 
 # List to hold CSV rows and initialize annotation counter
 annotations = []
 annotation_id = 1
-
-# Slide window
-def sliding_window(image, window_size, step_size):
-    for y in range(0, image.shape[0], step_size[1]):
-        for x in range(0, image.shape[1], step_size[0]):
-            yield (x, y, image[y: y + window_size[1], x: x + window_size[0]])
 
 # Loop over each file in the images folder
 for image_file in os.listdir(images_folder):
@@ -70,14 +64,18 @@ for image_file in os.listdir(images_folder):
                 fd = hog(window_gray, orientations=9, pixels_per_cell=(8, 8),
                          visualize=False, cells_per_block=(3, 3))
                 fd = fd.reshape(1, -1)
-                pred = model.predict(fd)
 
-                # If detection is positive and decision_function is high enough, store it
-                if pred == 1 and model.decision_function(fd) > 0.5:
+                # Predict using the Random Forest classifier
+                pred = model.predict(fd)
+                # Use predict_proba to get the probability for class 1 (positive)
+                score = model.predict_proba(fd)[0, 1]
+
+                # If detection is positive and probability is high enough, store it
+                if pred == 1 and score > 0.5:
                     detections.append((
                         int(x * (downscale ** scale)),
                         int(y * (downscale ** scale)),
-                        model.decision_function(fd),
+                        score,
                         int(size[0] * (downscale ** scale)),
                         int(size[1] * (downscale ** scale))
                     ))
@@ -88,8 +86,8 @@ for image_file in os.listdir(images_folder):
             # Create rectangles from detections: [x, y, x+w, y+h]
             rects = np.array([[x, y, x + w, y + h] for (x, y, _, w, h) in detections])
             # Extract scores for each detection
-            scores = np.array([score[0] for (x, y, score, w, h) in detections])
-            # Apply non-max suppression with overlap threshold 0.3
+            scores = np.array([score for (x, y, score, w, h) in detections])
+            # Apply non-max suppression with overlap threshold 0.1
             picks = non_max_suppression(rects, probs=scores, overlapThresh=0.1)
 
             # For each final detection, append a row to annotations list
@@ -107,7 +105,7 @@ print(f"Detection complete. CSV annotations saved to '{output_csv}'.")
 
 # Folder where images are stored and CSV file name
 images_folder = "PNGImages"
-csv_file = "Annotations (HOG+SVM).csv"
+csv_file = output_csv
 
 # Dictionary to hold annotations grouped by image name
 annotations_by_image = {}

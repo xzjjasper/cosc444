@@ -1,13 +1,13 @@
 from skimage.feature import hog
 import joblib, glob, os, cv2
-from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 
 train_data = []
 train_labels = []
 pos_im_path = 'DATAIMAGE/positive/'
 neg_im_path = 'DATAIMAGE/negative/'
-model_path = 'model.dat'
+model_path = 'models/models_RF.dat'
 
 def process_images(path, label):
     for ext in ["png", "jpg", "jpeg"]:
@@ -33,10 +33,11 @@ train_labels = np.array(train_labels)
 print('Data Prepared........')
 print('Train Data:', len(train_data))
 print('Train Labels (1,0):', len(train_labels))
-print("\nClassification with SVM\n")
+print("\nClassification with Random Forest\n")
 
-model = LinearSVC()
-print('Training...... Support Vector Machine')
+# Initialize Random Forest classifier (using 100 trees by default)
+model = RandomForestClassifier(n_estimators=100)
+print('Training...... Random Forest')
 model.fit(train_data, train_labels)
 joblib.dump(model, model_path)
 print(f'Model saved: {model_path}')
