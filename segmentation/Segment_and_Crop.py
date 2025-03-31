@@ -4,12 +4,15 @@ import cv2
 import numpy as np
 from PIL import Image
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils.utils import parse_csv_annotations
+from utils.utils import parse_csv_annotations_Jasper, parse_csv_annotations_HOG_RF
 from GrabCut import segment_with_grabcut
 
 # === CONFIGURATION ===
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-CSV_PATH = os.path.join(BASE_DIR, "data","PennFudanPed", "results_rst.csv")
+#For jasper dataset
+#CSV_PATH = os.path.join(BASE_DIR, "data","PennFudanPed", "results_rst.csv")
+# For Hog+RF dataset
+CSV_PATH = os.path.join(BASE_DIR, "detection","Annotations (HOG+RF).csv")
 IMG_DIR = os.path.join(BASE_DIR, "data", "PennFudanPed", "PNGImages")
 MASK_DIR = os.path.join(BASE_DIR, "output", "segmented_masks")
 CROP_DIR = os.path.join(BASE_DIR, "output", "crops")
@@ -18,7 +21,11 @@ os.makedirs(MASK_DIR, exist_ok=True)
 os.makedirs(CROP_DIR, exist_ok=True)
 
 # === Load Annotations ===
-annotations = parse_csv_annotations(CSV_PATH)
+# For jasper dataset
+#annotations = parse_csv_annotations_Jasper(CSV_PATH)
+# For HOG+RF dataset
+annotations = parse_csv_annotations_HOG_RF(CSV_PATH)
+
 
 # === Main Loop ===
 for image_file, boxes in annotations.items():

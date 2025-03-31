@@ -11,7 +11,7 @@ def run_step(description, command):
         print(f"[DONE] {description}\n")
 
 if __name__ == "__main__":
-    print("🔁 Running Full Instance Segmentation Pipeline")
+    print("Running Full Instance Segmentation Pipeline")
 
     # 1. Segment people using GrabCut and save masks + crops
     run_step("1. Segmenting with GrabCut", "python segmentation/Segment_and_Crop.py")
@@ -28,4 +28,4 @@ if __name__ == "__main__":
     # 5. Evaluate segmentation using IoU against ground truth
     run_step("5. Evaluating Segmentation (IoU)", "python IOUEvaluation.py")
 
-    print("🎉 Pipeline complete!")
+    print("Pipeline complete!")
