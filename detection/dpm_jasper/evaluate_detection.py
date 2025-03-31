@@ -153,12 +153,12 @@ def evaluate_detections_pascal_voc(gt_file, results_file, iou_threshold=0.5, sco
     
     # Add default class if class column is missing
     if class_column not in gt_df.columns:
-        print(f"Warning: Class column '{class_column}' not found in ground truth, adding default class 'default'")
-        gt_df[class_column] = 'default'
+        print(f"Warning: Class column '{class_column}' not found in ground truth, adding default class 'person'")
+        gt_df[class_column] = 'person'
     
     if class_column not in results_df.columns:
-        print(f"Warning: Class column '{class_column}' not found in results, adding default class 'default'")
-        results_df[class_column] = 'default'
+        print(f"Warning: Class column '{class_column}' not found in results, adding default class 'person'")
+        results_df[class_column] = 'person'
     
     # Add class column to required lists
     required_gt_columns.append(class_column)
@@ -459,41 +459,30 @@ def main():
     print(f"Confidence threshold: {args.score if args.score is not None else 'Not applied'}")
     print(f"Class column name: {args.class_column}")
     
-    # Predefined column name mappings
+    # Predefined column name mappings for Penn-Fudan-Ped dataset
     gt_column_mapping = {
-        'image_path': 'file_name',
-        'x1': 'x_min',
-        'y1': 'y_min',
-        'x2': 'x_max',
-        'y2': 'y_max'
+        'image_path': 'image_path',
+        'x1': 'x1',
+        'y1': 'y1',
+        'x2': 'x2',
+        'y2': 'y2',
+        'class': 'class'
     }
     
-    results_column_mapping = {}
+    results_column_mapping = {
+        'image_path': 'image_path',
+        'x1': 'x1',
+        'y1': 'y1',
+        'x2': 'x2',
+        'y2': 'y2',
+        'score': 'score',
+        'class': 'class'
+    }
     
     # Check if auto-mapping is needed
     if not args.auto_map:
         gt_column_mapping = {}
         results_column_mapping = {}
-    
-    # Read one line to auto-detect possible column name mappings
-    try:
-        gt_df_peek = pd.read_csv(args.gt, nrows=1)
-        
-        # Check ground truth file column names
-        if 'file_name' in gt_df_peek.columns and 'image_path' not in gt_df_peek.columns:
-            gt_column_mapping['image_path'] = 'file_name'
-        
-        if all(col in gt_df_peek.columns for col in ['x_min', 'y_min', 'x_max', 'y_max']):
-            gt_column_mapping.update({
-                'x1': 'x_min',
-                'y1': 'y_min',
-                'x2': 'x_max',
-                'y2': 'y_max'
-            })
-        
-        print("Auto-detected ground truth column name mappings:", gt_column_mapping)
-    except Exception as e:
-        print(f"Could not auto-detect ground truth column names: {e}")
     
     # Run evaluation
     metrics = evaluate_detections_pascal_voc(
